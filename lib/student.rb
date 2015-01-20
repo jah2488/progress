@@ -1,11 +1,24 @@
-class Student < Struct.new(:name, :absenses, :tardies, :assignments)
+class Student
+  attr_accessor :name, :absenses, :tardies, :submissions, :opts
+
+  def initialize(name: '', absenses: 0, tardies: 0, submissions: [], **opts)
+    @name = name
+    @absenses = absenses
+    @tardies = tardies
+    @submissions = submissions.map { |s| Submission.new(Hash[s.map { |k,v| [k.to_sym, v]}]) }
+    @opts = opts
+  end
+
+  def self.attributes
+    self.new.to_h.keys
+  end
 
   def completed
-    assignments.select(&:complete?).length
+    submissions.select(&:complete).length
   end
 
   def late
-    assignments.select(&:late?).length
+    submissions.select(&:late).length
   end
 
   def tardies_info
@@ -27,12 +40,20 @@ class Student < Struct.new(:name, :absenses, :tardies, :assignments)
     end
   end
 
+  def add_submission(submission)
+    if submissions.map { |x| x.title }.include?(submission.title)
+      puts 'duplicate detected'
+    else
+      submissions << submission
+    end
+  end
+
   def completed_info
-    to_p(:complete?)
+    to_p(:complete)
   end
 
   def late_info
-    to_p(:late?)
+    to_p(:late)
   end
 
   def to_hist
@@ -45,7 +66,7 @@ class Student < Struct.new(:name, :absenses, :tardies, :assignments)
       type: 'late'
     },
     {
-      amount: "[red]#{'#' * (assignments.length - completed)}[/]",
+      amount: "[red]#{'#' * (submissions.length - completed)}[/]",
       type: 'incomplete'
     }]
   end
@@ -55,21 +76,38 @@ class Student < Struct.new(:name, :absenses, :tardies, :assignments)
      completed: completed_info, late: late_info}
   end
 
+  def to_h
+    {
+      name: name,
+      absenses: absenses,
+      tardies: tardies,
+      submissions: submissions.map(&:to_h)
+    }
+  end
+
+  def to_json(*)
+    self.to_h.merge({ id: @opts[:id] }).to_json
+  end
+
   private
 
   def to_p(attr)
-    amount  = assignments.select(&attr).length
-    total   = assignments.length
-    percent = ((amount.to_f / total.to_f) * 100).round
+    amount  = submissions.select(&attr).length
+    total   = REPO[:assignments].length
+    if total.zero?
+      percent = 100
+    else
+      percent = ((amount.to_f / total.to_f) * 100).round
+    end
     "[#{c(percent, attr)}]#{amount}/#{total} (#{percent}%)[/]"
   end
 
   def c(n, attr)
     map = {
-      'complete?' => {
+      'complete' => {
         :low => 'red', :mid => 'yellow', :top => 'green'
       },
-      'late?' => {
+      'late' => {
         :low => 'green', :mid => 'yellow', :top => 'red'
       }
     }

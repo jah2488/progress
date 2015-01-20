@@ -1,16 +1,25 @@
-class Assignment < Struct.new(:title, :late?, :complete?)
-  def to_hash
+class Assignment
+  attr_accessor :title, :info, :opts
+
+  def initialize(title: '', info: '', **opts)
+    @title = title
+    @info  = info
+    @opts  = opts
+  end
+
+  def self.attributes
+    self.new.to_h.keys
+  end
+
+  def to_h
     {
       title: title,
-      progress: progress_info
+      info: info
     }
   end
 
-  def progress_info
-    return "[green]########[/]"  if complete?
-    return "[yellow]####[/]" if !complete? && !late?
-    return "[red]#[/]" if !complete?
-    return "[yellow]##[/]" if late?
+  def to_json(*)
+    self.to_h.merge({ id: @opts[:id] }).to_json
   end
 end
 
