@@ -10,13 +10,15 @@ class ProgressManager
     menu_view
   end
 
-  def get(prompt = '>')
-    print prompt + ' '
+  def get(prompt = '>', default = '')
+    print Formatador.parse(prompt) + ' '
+    print Formatador.parse("[[light_cyan]#{default}[/]] ") unless default.empty?
     response = gets.chomp
-    if response == 'q'
-      #menu_view <- cant quit when on menu_view need to implement 'view stack'
+    if response.empty?
+      default
+    else
+      response
     end
-    response
   end
 
   def menu_view
@@ -77,27 +79,29 @@ class ProgressManager
       avail_students.each_with_index do |student, index|
         puts "#{index}) #{student.name}"
       end
-      student_record = avail_students[get.to_i]
+      student_record = avail_students[get('>', '0').to_i]
 
       puts 'Which assignment?'
       filtered = assignments.reject { |a| student_record.submissions.any? { |s| s.title == a.opts[:id] } }
       filtered.each_with_index do |assignment, index|
         puts "#{index}) #{assignment.title}"
       end
-      assignment = filtered[get.to_i]
+      assignment = filtered[get('>', '0').to_i]
 
       submission = Submission.new(title: assignment.opts[:id])
-      is_late = get('< late (y/n) >')
-      is_complete = get('< complete (y/n) >')
-      submission.late = !!(is_late =~ /[y|yes|true|1]/)
-      submission.complete = !!(is_complete =~ /[y|yes|true|1]/)
 
-      student_record.add_submission(submission)
+      is_late = get('< late (y/[light_cyan]n[/]) >', 'n')
+      is_complete = get('< complete ([light_cyan]y[/]/n) >', 'y')
 
-      puts student_record.name
-      puts assignment.title
+      submission.late = !!(is_late =~ /[y|yes]/)
+      submission.complete = !!(is_complete =~ /[y|yes]/)
+
+
+      puts "#{student_record.name} - #{assignment.title}"
       puts submission.to_h
-      if !!(get('< Is correct? >') =~ /[y|yes|true|1]/)
+
+      if !!(get('< Correct? ([light_cyan]y[/]/n) >', 'y') =~ /[y|yes]/)
+        student_record.add_submission(submission)
         break
       end
     end
@@ -118,6 +122,8 @@ class ProgressManager
         puts "Breakdown";Formatador.display_compact_table(student.first.to_hist)
       else
         if timeline
+          #yay pipelining!
+          #omg the horror of this method chaining mess
           assignments = @students.map(&:submissions)
           formatted_as = assignments
             .map { |x| x.group_by { |a| a.title } }
