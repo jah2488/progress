@@ -1,12 +1,8 @@
-class Submission
+class Submission < Record
   attr_accessor :title, :late, :complete, :opts
 
   def initialize(title: '', late: false, complete: true, **opts)
     @title, @late, @complete, @opts = *[title, late, complete, opts]
-  end
-
-  def self.attributes
-    Submission.new.to_h.keys
   end
 
   def to_hash
@@ -29,10 +25,6 @@ class Submission
       late: late,
       complete: complete
     }
-  end
-
-  def to_json(*)
-    self.to_h.merge({ id: @opts[:id] }).to_json
   end
 end
 

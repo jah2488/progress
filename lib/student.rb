@@ -1,4 +1,4 @@
-class Student
+class Student < Record
   attr_accessor :name, :absenses, :tardies, :submissions, :opts
 
   def initialize(name: '', absenses: 0, tardies: 0, submissions: [], **opts)
@@ -91,10 +91,6 @@ class Student
       tardies: tardies,
       submissions: submissions.map(&:to_h)
     }
-  end
-
-  def to_json(*)
-    self.to_h.merge({ id: @opts[:id] }).to_json
   end
 
   private
