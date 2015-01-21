@@ -25,6 +25,7 @@ class ProgressManager
     ui_loop do |input|
       puts '---- Student and Assignment progress tracker ----'
       puts 'Add (s)tudent, (a)ssignment, add s(u)bmission [p to progress, q to quit, ! to debug]'
+      puts 'Add a(b)sense, (t)ardy'
 
       input = get
 
@@ -34,12 +35,46 @@ class ProgressManager
       when 's' then add_student_view
       when 'u' then add_submission_view
       when 'a' then add_assignment_view
+      when 'b' then add_absense_view
+      when 't' then add_tardie_view
       when 'q' then puts 'goodbye'; exit
       when '!' then require 'pry'; binding.pry
       end
 
       input
     end
+  end
+
+  def add_absense_view
+    student = nil
+    ui_loop do
+      puts 'Add absense to which student?'
+      students.each_with_index do |student, index|
+        puts "#{index}) #{student.name} - #{student.absenses}"
+      end
+      student = students[get.to_i]
+      puts
+      puts student.name
+      break if get('< Are you sure? (y/n) >') =~ /y/
+    end
+    student.add_absense
+    REPO.update(:students, student)
+  end
+
+  def add_tardie_view
+    student = nil
+    ui_loop do
+      puts 'Add tardie to which student?'
+      students.each_with_index do |student, index|
+        puts "#{index}) #{student.name} - #{student.tardie}"
+      end
+      student = students[get.to_i]
+      puts
+      puts student.name
+      break if get('< Are you sure? (y/n) >') =~ /y/
+    end
+    student.add_tardie
+    REPO.update(:students, student)
   end
 
   def add_assignment_view
@@ -81,7 +116,7 @@ class ProgressManager
       end
       student_record = avail_students[get('>', '0').to_i]
 
-      puts 'Which assignment?'
+      puts "Which assignment for #{student_record.name}?"
       filtered = assignments.reject { |a| student_record.submissions.any? { |s| s.title == a.opts[:id] } }
       filtered.each_with_index do |assignment, index|
         puts "#{index}) #{assignment.title}"

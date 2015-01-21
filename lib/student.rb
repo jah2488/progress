@@ -40,6 +40,14 @@ class Student
     end
   end
 
+  def add_absense
+    @absenses = (@absenses.to_i.succ).to_s
+  end
+
+  def add_tardie
+    @tardies = (@tardies.to_i.succ).to_s
+  end
+
   def add_submission(submission)
     if submissions.map { |x| x.title }.include?(submission.title)
       puts 'duplicate detected'
