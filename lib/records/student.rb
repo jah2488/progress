@@ -44,7 +44,7 @@ class Student < Record
     @absenses = (@absenses.to_i.succ).to_s
   end
 
-  def add_tardie
+  def add_tardy
     @tardies = (@tardies.to_i.succ).to_s
   end
 

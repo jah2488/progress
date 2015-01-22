@@ -1,11 +1,12 @@
+$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)) + '/../lib')
+
 require 'formatador'
 require 'json'
-require_relative '../lib/repository'
-require_relative '../lib/record'
-require_relative '../lib/assignment'
-require_relative '../lib/submission'
-require_relative '../lib/student'
-require_relative '../lib/progress_manager'
+
+Dir[File.expand_path(File.dirname(__FILE__)) + '/../lib/**/*.rb'].map do |file|
+  require_relative file
+end
+
 
 REPO = Repository.new
 REPO.register_type(Assignment, 'data/assignments.json', true)

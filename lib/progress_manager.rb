@@ -4,77 +4,19 @@ class ProgressManager
   def initialize(students, assignments)
     @students = students
     @assignments = assignments
+    @vm = ViewManager.new
   end
 
   def run
+    @vm.view_stack.push(TestView.new(@vm))
+    @vm.view_stack.push(MenuView.new(@vm, students: @students))
+    loop do
+      system('clear')
+      @vm.present
+      response = @vm.prompt
+      @vm.action(response)
+    end
     menu_view
-  end
-
-  def get(prompt = '>', default = '')
-    print Formatador.parse(prompt) + ' '
-    print Formatador.parse("[[light_cyan]#{default}[/]] ") unless default.empty?
-    response = gets.chomp
-    if response.empty?
-      default
-    else
-      response
-    end
-  end
-
-  def menu_view
-    ui_loop do |input|
-      puts '---- Student and Assignment progress tracker ----'
-      puts 'Add (s)tudent, (a)ssignment, add s(u)bmission [p to progress, q to quit, ! to debug]'
-      puts 'Add a(b)sense, (t)ardy'
-
-      input = get
-
-      case input
-      when 'p' then progress_view
-      when 'h' then puts 'help!'
-      when 's' then add_student_view
-      when 'u' then add_submission_view
-      when 'a' then add_assignment_view
-      when 'b' then add_absense_view
-      when 't' then add_tardie_view
-      when 'q' then puts 'goodbye'; exit
-      when '!' then require 'pry'; binding.pry
-      end
-
-      input
-    end
-  end
-
-  def add_absense_view
-    student = nil
-    ui_loop do
-      puts 'Add absense to which student?'
-      students.each_with_index do |student, index|
-        puts "#{index}) #{student.name} - #{student.absenses}"
-      end
-      student = students[get.to_i]
-      puts
-      puts student.name
-      break if get('< Are you sure? (y/n) >') =~ /y/
-    end
-    student.add_absense
-    REPO.update(:students, student)
-  end
-
-  def add_tardie_view
-    student = nil
-    ui_loop do
-      puts 'Add tardie to which student?'
-      students.each_with_index do |student, index|
-        puts "#{index}) #{student.name} - #{student.tardie}"
-      end
-      student = students[get.to_i]
-      puts
-      puts student.name
-      break if get('< Are you sure? (y/n) >') =~ /y/
-    end
-    student.add_tardie
-    REPO.update(:students, student)
   end
 
   def add_assignment_view
@@ -141,61 +83,6 @@ class ProgressManager
       end
     end
     REPO.update(:students, student_record)
-  end
-
-  def progress_view
-    input  = ''
-    sort   = ''
-    name   = ''
-    timeline = false
-    while input != 'q' do
-      system('clear')
-
-      if !name.empty? && (student = @students.select { |x| x.name.downcase =~ Regexp.new(name.downcase) }).length > 0
-        puts 'Overview'; Formatador.display_compact_table(student.map(&:to_hash))
-        puts 'Timeline'; Formatador.display_compact_table(student.first.submissions.map(&:to_hash))
-        puts 'Breakdown';Formatador.display_compact_table(student.first.to_hist)
-      else
-        if timeline
-          #yay pipelining!
-          #omg the horror of this method chaining mess
-          assignments = @students.map(&:submissions)
-          formatted_as = assignments
-            .map { |x| x.group_by { |a| a.to_hash[:title] } }
-            .inject({}) { |a,b| a.merge(b) { |_, x, y| [*x, *y] }}
-            .map { |k,v| { k => "[light_green](#{grade = ((v.select(&:complete).length.to_f / assignments.length.to_f) * 100).round}%)#{' ' if grade < 100} [/][green]#{'#' * v.select(&:complete).length}[/]"} }
-            .map { |k| { completed: k.values.first, title:k.keys.first }}
-          Formatador.display_compact_table(formatted_as)
-        else
-          Formatador.display_compact_table(@students.map(&:to_hash))
-        end
-      end
-
-      input = display_ui
-      name  = ''
-
-      if sort == input
-        @students = @students.reverse
-      else
-        timeline = false
-        sort = input
-        case sort
-        when '#' then timeline = true
-        when 'c' then @students = @students.sort_by { |x| x.completed }
-        when 'l' then @students = @students.sort_by { |x| x.late }
-        when 'n' then @students = @students.sort_by { |x| x.name }
-        when 'a' then @students = @students.sort_by { |x| x.absenses }
-        when 't' then @students = @students.sort_by { |x| x.tardies }
-        when 's' then print 'student > '; name = gets.chomp
-        end
-      end
-    end
-  end
-
-  def display_ui
-    puts 'Sort by (c)ompleted, (l)ate, (n)ame, (a)bsenses, (t)ardies. filter by (s)tudent [q to quit]'
-    print '> '
-    gets.chomp
   end
 
   private
