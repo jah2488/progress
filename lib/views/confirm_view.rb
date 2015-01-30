@@ -5,7 +5,7 @@ class ConfirmView < View
   end
 
   def prompt
-    get('< Are you sure(y/n) >')
+    get('< Are you sure([light_cyan]y[/]/n) >', 'y')
   end
 
   def action(response)

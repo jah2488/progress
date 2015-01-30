@@ -8,15 +8,22 @@ class AddAbsenseView < View
   end
 
   def action(response)
-    confirm = -> {
-      student = @students[response.to_i]
-      student.add_absense
-      REPO.update(:students, student)
-    }
     case response
-    when '0'..@students.length.to_s then @vm.view_stack.push(ConfirmView.new(@vm, on_present: -> { puts @students[response.to_i].name }, on_confirm: confirm))
+    when '0'..@students.length.to_s then confirm_add(response)
     else
       super(response)
     end
+  end
+
+  def confirm_add(response)
+    @vm.navigate(ConfirmView,
+                 on_present: -> do
+                   puts @students[response.to_i].name
+                 end,
+                 on_confirm: -> do
+                   student = @students[response.to_i]
+                   student.add_absense
+                   REPO.update(:students, student)
+                 end)
   end
 end

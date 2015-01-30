@@ -1,9 +1,16 @@
 class AddAssignmentView < View
-  def present
-    puts 'Add Assignment'
+
+  def initialize(vm, **opts)
+    super(vm, **opts)
+
     @attrs = Assignment.attributes.each
     @current_attr = @attrs.next
-    @assignment = {}
+    @assignment   = {}
+  end
+
+  def present
+    puts 'Add Assignment'
+    puts @assignment.inspect
   end
 
   def prompt
@@ -12,5 +19,9 @@ class AddAssignmentView < View
 
   def action(response)
     @assignment[@current_attr] = response
+    @current_attr = @attrs.next
+  rescue StopIteration => _ #Stop Iteration is handled by Kernel#loop
+    REPO.save(:assignments, @assignment)
+    @vm.back
   end
 end

@@ -8,13 +8,13 @@ class MenuView < View
 
   def action(response)
     case response
-    when 'p' then @vm.view_stack.push(ProgressView.new(@vm, students: @students))
+    when 'p' then @vm.navigate(ProgressView, students: @students)
     when 'h' then puts "Help! Help! I'm being oppressed!"
-    when 's' then @vm.view_stack.push(AddStudentView.new(@vm))
-    when 'u' then @vm.view_stack.push(AddSubmissionView.new(@vm, students: @students, assignments: @assignments))
-    when 'a' then @vm.view_stack.push(AddAssignmentView.new(@vm))
-    when 'b' then @vm.view_stack.push(AddAbsenseView.new(@vm, students: @students))
-    when 't' then @vm.view_stack.push(AddTardyView.new(@vm, students: @students))
+    when 's' then @vm.navigate(AddStudentView)
+    when 'u' then @vm.navigate(AddSubmissionView, students: @students, assignments: @assignments)
+    when 'a' then @vm.navigate(AddAssignmentView)
+    when 'b' then @vm.navigate(AddAbsenseView, students: @students)
+    when 't' then @vm.navigate(AddTardyView, students: @students)
     when '!' then require 'pry'; binding.pry
     else
       super(response)

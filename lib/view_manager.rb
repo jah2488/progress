@@ -5,15 +5,16 @@ class ViewManager
   end
 
   def navigate(view, **kwargs)
-    @view_stack.push(view.new(self, **kwags))
+    @view_stack.push(view.new(self, **kwargs))
   end
+
   def back
     @view_stack.pop
   end
 
   def present
     if @view_stack.empty?
-      puts 'Are you sure you want to (q)uit?'
+      puts 'Goodbye'
     else
       @view_stack.last.present
     end
@@ -30,7 +31,7 @@ class ViewManager
   def action(response)
     if @view_stack.empty?
       case response
-      when 'q' then puts 'goodbye';exit!
+      when 'q' then puts 'cya'; exit!
       else
         exit!
       end

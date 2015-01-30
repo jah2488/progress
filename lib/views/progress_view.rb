@@ -20,7 +20,7 @@ class ProgressView < View
           Formatador.display_compact_table(@students.map(&:to_hash))
         end
       end
-    puts 'Sort by (c)ompleted, (l)ate, (n)ame, (a)bsenses, (t)ardies. filter by (s)tudent [q to quit]'
+    puts 'Sort by (c)ompleted, (l)ate, (n)ame, (a)bsenses, (t)ardies. filter by (s)tudent [q to quit, # view completion by assignment]'
   end
 
   def action(response)

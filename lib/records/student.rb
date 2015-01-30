@@ -125,5 +125,3 @@ class Student < Record
   end
 
 end
-
-

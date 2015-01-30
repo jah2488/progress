@@ -8,15 +8,20 @@ class AddTardyView < View
   end
 
   def action(response)
-    confirm = -> {
-      student = @students[response.to_i]
-      student.add_tardy
-      REPO.update(:students, student)
-    }
     case response
-    when '0'..@students.length.to_s then @vm.view_stack.push(ConfirmView.new(@vm, on_present: -> { puts @students[response.to_i].name }, on_confirm: confirm))
+    when '0'..@students.length.to_s then confirm_add(response)
     else
       super(response)
     end
+  end
+
+  def confirm_add(response)
+    on_present = -> { puts @students[response.to_i].name }
+    on_confirm = -> do
+      student = @students[response.to_i]
+      student.add_tardy
+      REPO.update(:students, student)
+    end
+    @vm.navigate(ConfirmView, on_present: on_present, on_confirm: on_confirm)
   end
 end
