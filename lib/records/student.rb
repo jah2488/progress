@@ -5,12 +5,8 @@ class Student < Record
     @name = name
     @absenses = absenses
     @tardies = tardies
-    @submissions = submissions.map { |s| Submission.new(Hash[s.map { |k,v| [k.to_sym, v]}]) }
+    @submissions = submissions.map { |s| Submission.new(Hash[s.map { |k,v| [k.to_sym, v]}]) } #move to submission
     @opts = opts
-  end
-
-  def self.attributes
-    self.new.to_h.keys
   end
 
   def completed

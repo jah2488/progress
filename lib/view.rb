@@ -1,11 +1,8 @@
 class View
-
   def initialize(vm, **opts)
     @vm = vm
     @messages = Array.new(5, '')
-    opts.each do |k, v|
-      instance_variable_set("@#{k}", v)
-    end
+    set_opts(**opts)
   end
 
   def present
@@ -18,9 +15,13 @@ class View
 
   def action(response)
     case response
-    when 'q' then puts 'goodbye'; @vm.back
+    when 'q' then @vm.back
+    else
+      puts 'invalid'
     end
   end
+
+  protected
 
   def get(prompt = '>', default = '')
     print Formatador.parse(prompt) + ' '
@@ -32,4 +33,13 @@ class View
       response
     end
   end
+
+  private
+
+  def set_opts(**opts)
+    opts.each do |k, v|
+      instance_variable_set("@#{k}", v)
+    end
+  end
 end
+

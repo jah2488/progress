@@ -16,14 +16,12 @@ class AddAbsenseView < View
   end
 
   def confirm_add(response)
-    @vm.navigate(ConfirmView,
-                 on_present: -> do
-                   puts @students[response.to_i].name
-                 end,
-                 on_confirm: -> do
-                   student = @students[response.to_i]
-                   student.add_absense
-                   REPO.update(:students, student)
-                 end)
+    on_present = -> { puts @students[response.to_i].name }
+    on_confirm = -> do
+      student = @students[response.to_i]
+      student.add_absense
+      REPO.update(:students, student)
+    end
+    @vm.navigate(ConfirmView, on_present: on_present, on_confirm: on_confirm)
   end
 end

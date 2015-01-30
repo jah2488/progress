@@ -13,7 +13,5 @@ class Assignment < Record
       info: info
     }
   end
-
 end
-
 

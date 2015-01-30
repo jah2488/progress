@@ -1,5 +1,6 @@
 class ViewManager
   attr_accessor :view_stack
+
   def initialize(vs = [])
     @view_stack = vs
   end
@@ -40,3 +41,4 @@ class ViewManager
     end
   end
 end
+

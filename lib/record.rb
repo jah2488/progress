@@ -1,5 +1,4 @@
 class Record
-
   def self.attributes
     self.new.to_h.keys
   end

@@ -11,19 +11,19 @@ class Repository
   end
 
   def register_type(type, location, load_records = false)
-    @tables[to_n(type)] = {
+    set(type, {
       class: type,
       location: location,
       records: []
-    }
+    })
     load(type, location) if load_records
     self
   end
 
   def load(type, loc = nil)
-    location = loc || @tables[to_n(type)].location
+    location = loc || get(type).location
     records  = JSON.parse(File.open(location).read)
-    @tables[to_n(type)][:records] = records.map do |record|
+    get(type)[:records] = records.map do |record|
       type.new(to_sym_hash(record))
     end
   end
@@ -53,6 +53,14 @@ class Repository
   end
 
   private
+
+  def get(type)
+    @tables[to_n(type)]
+  end
+
+  def set(type, val)
+    @tables[to_n(type)] = val
+  end
 
   def to_sym_hash(hash)
     Hash[hash.map { |k, v| [k.to_sym, v] }]
