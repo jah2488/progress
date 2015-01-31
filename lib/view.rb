@@ -5,12 +5,20 @@ class View
     set_opts(**opts)
   end
 
+  def navigate(view, **kwargs)
+    @vm.navigate(view, **kwargs)
+  end
+
   def present
     @messages[-5..-1].map(&method(:puts))
   end
 
   def prompt
     get
+  end
+
+  def say(*args)
+    args.each(&@messages.method(:push))
   end
 
   def action(response)

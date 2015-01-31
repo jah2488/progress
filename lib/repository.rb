@@ -22,7 +22,7 @@ class Repository
 
   def load(type, loc = nil)
     location = loc || get(type).location
-    records  = JSON.parse(File.open(location).read)
+    records  = JSON.parse(File.open(location).read) # Currently loading from file system, but no reason it couldn't be from any api
     get(type)[:records] = records.map do |record|
       type.new(to_sym_hash(record))
     end
@@ -49,6 +49,7 @@ class Repository
   end
 
   def write(repo)
+    `cp #{repo[:location]} #{repo[:location]}.bk` # create a backup of the file on each save
     File.write(repo[:location], repo[:records].to_json)
   end
 
