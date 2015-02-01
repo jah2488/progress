@@ -1,7 +1,7 @@
 require_relative './add_to_student_view'
-class AddTardyView < View
+class AddTardyView < AddToStudentView
   def attr
-    :tardy
+    :tardies
   end
 
   def inc_attr
