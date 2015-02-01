@@ -13,5 +13,9 @@ class Assignment < Record
       info: info
     }
   end
+
+  def to_s
+    "'#{title}'"
+  end
 end
 

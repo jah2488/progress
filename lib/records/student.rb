@@ -89,6 +89,10 @@ class Student < Record
     }
   end
 
+  def to_s
+    name
+  end
+
   private
 
   def to_p(attr)

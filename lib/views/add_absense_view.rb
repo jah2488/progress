@@ -1,27 +1,10 @@
-class AddAbsenseView < View
-  def present
-    puts 'Add absense to which student?'
-    @students.each_with_index do |student, index|
-      puts "#{index}) #{student.name} - #{student.absenses}"
-    end
-    super
+require_relative './add_to_student_view'
+class AddAbsenseView < AddToStudentView
+  def attr
+    :absenses
   end
 
-  def action(response)
-    case response
-    when '0'..@students.length.to_s then confirm_add(response)
-    else
-      super(response)
-    end
-  end
-
-  def confirm_add(response)
-    on_present = -> { puts @students[response.to_i].name }
-    on_confirm = -> do
-      student = @students[response.to_i]
-      student.add_absense
-      REPO.update(:students, student)
-    end
-    @vm.navigate(ConfirmView, on_present: on_present, on_confirm: on_confirm)
+  def inc_attr
+    :add_absense
   end
 end

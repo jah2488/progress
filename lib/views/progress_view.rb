@@ -7,15 +7,7 @@ class ProgressView < View
         puts 'Breakdown';Formatador.display_compact_table(student.first.to_hist)
       else
         if @timeline
-          #yay pipelining!
-          #omg the horror of this method chaining mess
-          assignments = @students.map(&:submissions)
-          formatted_as = assignments
-            .map { |x| x.group_by { |a| a.to_hash[:title] } }
-            .inject({}) { |a,b| a.merge(b) { |_, x, y| [*x, *y] }}
-            .map { |k,v| { k => "[light_green](#{grade = ((v.select(&:complete).length.to_f / assignments.length.to_f) * 100).round}%)#{' ' if grade < 100} [/][green]#{'#' * v.select(&:complete).length}[/]"} }
-            .map { |k| { completed: k.values.first, title:k.keys.first }}
-          Formatador.display_compact_table(formatted_as)
+          Formatador.display_compact_table(assignment_completion_timeline)
         else
           Formatador.display_compact_table(@students.map(&:to_hash))
         end
@@ -42,5 +34,33 @@ class ProgressView < View
         super(response)
       end
     end
+  end
+
+  def assignment_completion_timeline
+    assignments = @students.map(&:submissions)
+
+    title_hash        = -> (a)    { a.to_hash[:title] }
+    group_by_title    = -> (x)    { x.group_by(&title_hash) }
+    remove_duplicates = -> (a, b) { a.merge(b) { |_, x, y| [*x, *y] } }
+    display_progress  = -> ((k, v)) do
+      assn_count = assignments.length
+      late_count = v.select(&:late).length
+      comp_count = v.select(&:complete).length
+      grade    = ((comp_count.to_f / assn_count.to_f) * 100).round
+      late     = "[yellow]#{'#' * late_count}[/]"
+      complete = "[green]#{'#'  * (comp_count - late_count)}[/]"
+      {
+        k => "[light_green](#{grade}%)#{' ' if grade < 100} [/]#{late + complete}"
+      }
+    end
+    to_table = -> (k) do
+      { :"late / completed" => k.values.first, :title => k.keys.first }
+    end
+
+    assignments
+      .map(&group_by_title)
+      .inject({}, &remove_duplicates)
+      .map(&display_progress)
+      .map(&to_table)
   end
 end

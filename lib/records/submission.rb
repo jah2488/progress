@@ -26,5 +26,9 @@ class Submission < Record
       complete: complete
     }
   end
+
+  def to_s
+    "#{title} [late: #{late}] [complete: #{complete}]"
+  end
 end
 

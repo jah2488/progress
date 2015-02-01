@@ -13,12 +13,13 @@ class AddSubmissionView < View
             puts "#{index}) #{student.name}"
           end
         },
+        prompt: -> { get('>', '0') },
         action: -> response {
           case response
           when '0'..@avail_students.length.to_s
             @student = @avail_students[response.to_i]
           else
-            super(response)
+            response
           end
         }
       },
@@ -30,12 +31,13 @@ class AddSubmissionView < View
             puts "#{index}) #{assignment.title}"
           end
         },
+        prompt: -> { get('>', '0') },
         action: -> response {
           case response
           when '0'..@filtered.length.to_s
             @assignment = @filtered[response.to_i]
           else
-            super(response)
+            response
           end
         }
       },
@@ -48,6 +50,7 @@ class AddSubmissionView < View
           @is_complete = get('< complete ([light_cyan]y[/]/n) >', 'y')
         },
         action: -> response {
+          @vm.back if response =~ /[qQ]/
           @submission[:late] = !!(@is_late =~ /y/)
           @submission[:complete] = !!(@is_complete =~ /y/)
           @submission[:title] = @assignment.opts[:id]
@@ -81,7 +84,7 @@ class AddSubmissionView < View
   end
 
   def action(response)
-    @current_step.fetch(:action).call(response)
+    super(@current_step.fetch(:action).call(response))
     @current_step = @step_enum.next
   rescue StopIteration => _
     puts 'end of iteration'
